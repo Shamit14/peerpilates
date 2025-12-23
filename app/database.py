@@ -8,6 +8,10 @@ DATABASE_URL = settings.DATABASE_URL
 if not DATABASE_URL:
     raise RuntimeError("DATABASE_URL is not set in environment variables")
 
+# Convert postgresql:// to postgresql+asyncpg:// if needed (for Render compatibility)
+if DATABASE_URL.startswith("postgresql://"):
+    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
+
 engine = create_async_engine(DATABASE_URL, echo=False)
 
 async_session = sessionmaker(

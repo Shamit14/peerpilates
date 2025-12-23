@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from starlette.middleware.sessions import SessionMiddleware
 from app.routes import users, ai_agent, protected, files
 from app.auth import routes as auth_routes
@@ -56,3 +58,21 @@ app.include_router(users.router, prefix="/api", tags=["Users"])
 app.include_router(ai_agent.router, prefix="/api", tags=["AI Agent"])
 app.include_router(protected.router, prefix="/api", tags=["Protected"])
 app.include_router(files.router, prefix="/api", tags=["Files"])
+
+# Serve frontend static files (for production)
+frontend_dist = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend", "dist")
+if os.path.exists(frontend_dist):
+    # Serve static assets (JS, CSS, images)
+    app.mount("/assets", StaticFiles(directory=os.path.join(frontend_dist, "assets")), name="assets")
+    
+    # Serve index.html for all non-API routes (SPA routing)
+    @app.get("/{full_path:path}")
+    async def serve_spa(full_path: str):
+        # If path starts with api, let it 404 naturally
+        if full_path.startswith("api"):
+            return FileResponse(status_code=404)
+        # Serve index.html for all other routes
+        index_path = os.path.join(frontend_dist, "index.html")
+        if os.path.exists(index_path):
+            return FileResponse(index_path)
+        return FileResponse(status_code=404)
