@@ -85,7 +85,7 @@ out
 
 # Nuxt.js build / generate output
 .nuxt
-dist
+# dist - commented out to allow frontend/dist for deployment
 
 # Gatsby files
 .cache/
@@ -124,7 +124,7 @@ __pycache__/
 .Python
 build/
 develop-eggs/
-dist/
+# dist/ - commented out to allow frontend/dist
 downloads/
 eggs/
 .eggs/
