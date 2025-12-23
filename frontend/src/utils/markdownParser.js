@@ -2,8 +2,9 @@ import React from 'react';
 
 /**
  * Parse markdown-like text and convert to formatted JSX
+ * Handles: **bold**, *italic*, `code`, headers, lists, etc.
  */
-function parseMarkdown(text) {
+export function parseMarkdown(text) {
   if (!text) return null;
   
   // Split by lines for processing
@@ -17,15 +18,17 @@ function parseMarkdown(text) {
     if (listItems.length > 0) {
       if (listType === 'ol') {
         elements.push(
-          <ol key={`ol-${currentIndex}`} className="list-decimal list-inside space-y-1 my-2 ml-2">
-            {listItems}
-          </ol>
+          React.createElement('ol', {
+            key: `ol-${currentIndex}`,
+            className: 'list-decimal list-inside space-y-1 my-2 ml-2'
+          }, listItems)
         );
       } else {
         elements.push(
-          <ul key={`ul-${currentIndex}`} className="list-disc list-inside space-y-1 my-2 ml-2">
-            {listItems}
-          </ul>
+          React.createElement('ul', {
+            key: `ul-${currentIndex}`,
+            className: 'list-disc list-inside space-y-1 my-2 ml-2'
+          }, listItems)
         );
       }
       listItems = [];
@@ -42,8 +45,6 @@ function parseMarkdown(text) {
     while (remaining.length > 0) {
       // Check for bold **text**
       const boldMatch = remaining.match(/\*\*(.+?)\*\*/);
-      // Check for italic *text* (but not **)
-      const italicMatch = remaining.match(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/);
       // Check for inline code `text`
       const codeMatch = remaining.match(/`(.+?)`/);
 
@@ -57,11 +58,6 @@ function parseMarkdown(text) {
         earliestMatch = boldMatch;
         matchType = 'bold';
       }
-      if (italicMatch && remaining.indexOf(italicMatch[0]) < matchIndex) {
-        matchIndex = remaining.indexOf(italicMatch[0]);
-        earliestMatch = italicMatch;
-        matchType = 'italic';
-      }
       if (codeMatch && remaining.indexOf(codeMatch[0]) < matchIndex) {
         matchIndex = remaining.indexOf(codeMatch[0]);
         earliestMatch = codeMatch;
@@ -71,23 +67,21 @@ function parseMarkdown(text) {
       if (earliestMatch) {
         // Add text before the match
         if (matchIndex > 0) {
-          parts.push(<span key={`${keyPrefix}-${partIndex++}`}>{remaining.slice(0, matchIndex)}</span>);
+          parts.push(React.createElement('span', { key: `${keyPrefix}-${partIndex++}` }, remaining.slice(0, matchIndex)));
         }
 
         // Add the formatted element
         if (matchType === 'bold') {
-          parts.push(<strong key={`${keyPrefix}-${partIndex++}`} className="font-semibold">{earliestMatch[1]}</strong>);
-        } else if (matchType === 'italic') {
-          parts.push(<em key={`${keyPrefix}-${partIndex++}`}>{earliestMatch[1]}</em>);
+          parts.push(React.createElement('strong', { key: `${keyPrefix}-${partIndex++}`, className: 'font-semibold' }, earliestMatch[1]));
         } else if (matchType === 'code') {
-          parts.push(<code key={`${keyPrefix}-${partIndex++}`} className="bg-gray-300 px-1 rounded text-sm font-mono">{earliestMatch[1]}</code>);
+          parts.push(React.createElement('code', { key: `${keyPrefix}-${partIndex++}`, className: 'bg-gray-200 px-1 rounded text-sm font-mono' }, earliestMatch[1]));
         }
 
         remaining = remaining.slice(matchIndex + earliestMatch[0].length);
       } else {
         // No more matches, add remaining text
         if (remaining) {
-          parts.push(<span key={`${keyPrefix}-${partIndex++}`}>{remaining}</span>);
+          parts.push(React.createElement('span', { key: `${keyPrefix}-${partIndex++}` }, remaining));
         }
         break;
       }
@@ -102,7 +96,7 @@ function parseMarkdown(text) {
     // Skip empty lines but add spacing
     if (!trimmedLine) {
       flushList();
-      elements.push(<div key={`space-${index}`} className="h-2" />);
+      elements.push(React.createElement('div', { key: `space-${index}`, className: 'h-2' }));
       return;
     }
 
@@ -110,9 +104,9 @@ function parseMarkdown(text) {
     if (trimmedLine.startsWith('## ')) {
       flushList();
       elements.push(
-        <h3 key={`h3-${index}`} className="font-bold text-lg mt-3 mb-1">
-          {formatInlineText(trimmedLine.slice(3), `h3-${index}`)}
-        </h3>
+        React.createElement('h3', { key: `h3-${index}`, className: 'font-bold text-lg mt-3 mb-1' },
+          formatInlineText(trimmedLine.slice(3), `h3-${index}`)
+        )
       );
       return;
     }
@@ -120,21 +114,19 @@ function parseMarkdown(text) {
     if (trimmedLine.startsWith('# ')) {
       flushList();
       elements.push(
-        <h2 key={`h2-${index}`} className="font-bold text-xl mt-3 mb-1">
-          {formatInlineText(trimmedLine.slice(2), `h2-${index}`)}
-        </h2>
+        React.createElement('h2', { key: `h2-${index}`, className: 'font-bold text-xl mt-3 mb-1' },
+          formatInlineText(trimmedLine.slice(2), `h2-${index}`)
+        )
       );
       return;
     }
 
-    // Bold headers like **Title:**
+    // Bold headers like **Title:** or **Title**
     if (/^\*\*[^*]+\*\*:?$/.test(trimmedLine) || /^\*\*[^*]+:\*\*$/.test(trimmedLine)) {
       flushList();
       const headerText = trimmedLine.replace(/\*\*/g, '').replace(/:$/, '');
       elements.push(
-        <h4 key={`h4-${index}`} className="font-semibold text-base mt-3 mb-1">
-          {headerText}
-        </h4>
+        React.createElement('h4', { key: `h4-${index}`, className: 'font-semibold text-base mt-3 mb-1' }, headerText)
       );
       return;
     }
@@ -147,9 +139,9 @@ function parseMarkdown(text) {
         listType = 'ol';
       }
       listItems.push(
-        <li key={`li-${index}`} className="text-gray-800">
-          {formatInlineText(numberedMatch[2], `li-${index}`)}
-        </li>
+        React.createElement('li', { key: `li-${index}`, className: 'text-gray-700' },
+          formatInlineText(numberedMatch[2], `li-${index}`)
+        )
       );
       return;
     }
@@ -162,9 +154,9 @@ function parseMarkdown(text) {
         listType = 'ul';
       }
       listItems.push(
-        <li key={`li-${index}`} className="text-gray-800">
-          {formatInlineText(bulletMatch[1], `li-${index}`)}
-        </li>
+        React.createElement('li', { key: `li-${index}`, className: 'text-gray-700' },
+          formatInlineText(bulletMatch[1], `li-${index}`)
+        )
       );
       return;
     }
@@ -172,9 +164,9 @@ function parseMarkdown(text) {
     // Regular paragraph
     flushList();
     elements.push(
-      <p key={`p-${index}`} className="my-1">
-        {formatInlineText(trimmedLine, `p-${index}`)}
-      </p>
+      React.createElement('p', { key: `p-${index}`, className: 'my-1' },
+        formatInlineText(trimmedLine, `p-${index}`)
+      )
     );
     currentIndex++;
   });
@@ -185,24 +177,4 @@ function parseMarkdown(text) {
   return elements;
 }
 
-/**
- * Message Component
- * Renders a single chat bubble with proper markdown formatting.
- */
-function Message({ sender, text }) {
-  const isUser = sender === 'user';
-  const baseClasses = "max-w-xl lg:max-w-3xl rounded-lg px-4 py-3 break-words";
-  const messageClasses = isUser
-    ? `bg-black text-white self-end` // User messages in black
-    : `bg-gray-100 text-gray-900 self-start border border-gray-200`; // AI messages in light gray
-
-  return (
-    <div className={`flex w-full ${isUser ? 'justify-end' : 'justify-start'} mb-4`}>
-      <div className={`${baseClasses} ${messageClasses} shadow-sm`}>
-        {isUser ? text : parseMarkdown(text)}
-      </div>
-    </div>
-  );
-}
-
-export default Message;
+export default parseMarkdown;
