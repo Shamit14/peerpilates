@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { api } from '../config/api';
 
 const SendIcon = () => (
     <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current">
@@ -61,7 +62,7 @@ function InputBar({ onSendMessage, isLoading }) {
           const formData = new FormData();
           files.forEach(file => formData.append('files', file));
 
-          const response = await fetch('http://localhost:8000/api/files/upload', {
+          const response = await fetch(api.files.upload, {
               method: 'POST',
               body: formData,
           });

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { api } from '../config/api';
 
 const Auth = ({ onAuthSuccess }) => {
   const [isLogin, setIsLogin] = useState(true);
@@ -15,7 +16,7 @@ const Auth = ({ onAuthSuccess }) => {
   React.useEffect(() => {
     const checkGoogleConfig = async () => {
       try {
-        const response = await fetch('http://localhost:8000/api/auth/google/status');
+        const response = await fetch(api.auth.status);
         const data = await response.json();
         setGoogleConfigured(data.configured);
       } catch (error) {
@@ -93,10 +94,9 @@ const Auth = ({ onAuthSuccess }) => {
     
     // Add allow_signup parameter based on current mode
     const allowSignup = !isLogin; // true for signup mode, false for login mode
-    const googleUrl = `http://localhost:8000/api/auth/google/login?allow_signup=${allowSignup}`;
     
     // Redirect to Google OAuth
-    window.location.href = googleUrl;
+    window.location.href = api.auth.googleLogin(allowSignup);
   };
 
   const handleSubmit = async (e) => {
@@ -107,12 +107,12 @@ const Auth = ({ onAuthSuccess }) => {
     setIsLoading(true);
     
     try {
-      const endpoint = isLogin ? '/api/login' : '/api/signup';
+      const endpoint = isLogin ? api.auth.login : api.auth.signup;
       const payload = isLogin 
         ? { email: formData.email, password: formData.password }
         : formData;
       
-      const response = await fetch(`http://localhost:8000${endpoint}`, {
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

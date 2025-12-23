@@ -5,12 +5,10 @@ from app.config import settings
 # Use settings.DATABASE_URL loaded from config.py
 DATABASE_URL = settings.DATABASE_URL
 
-print("LOADED DATABASE_URL:", DATABASE_URL)
-
 if not DATABASE_URL:
-    raise RuntimeError("DATABASE_URL is not set in .env")
+    raise RuntimeError("DATABASE_URL is not set in environment variables")
 
-engine = create_async_engine(DATABASE_URL, echo=True)
+engine = create_async_engine(DATABASE_URL, echo=False)
 
 async_session = sessionmaker(
     bind=engine,

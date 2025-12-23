@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState } from 'react';
+import { api } from '../config/api';
 
 const FileUploadContext = createContext();
 
@@ -23,7 +24,7 @@ export const FileUploadProvider = ({ children }) => {
       formData.append('files', file);
       
       // Call backend API
-      const response = await fetch('http://localhost:8000/api/files/upload', {
+      const response = await fetch(api.files.upload, {
         method: 'POST',
         body: formData,
       });

@@ -4,4 +4,12 @@ import react from '@vitejs/plugin-react-swc'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  define: {
+    // Fallback for API URL if not set in environment
+    'import.meta.env.VITE_API_URL': JSON.stringify(process.env.VITE_API_URL || 'http://localhost:8000')
+  },
+  build: {
+    outDir: 'dist',
+    sourcemap: false
+  }
 })

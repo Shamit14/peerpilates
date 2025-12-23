@@ -5,27 +5,36 @@ from app.routes import users, ai_agent, protected, files
 from app.auth import routes as auth_routes
 from app.models.user import Base
 from app.database import engine
+from app.config import settings
+import os
 
 
 app = FastAPI(
-    title="AI Agent Backend",
-    description="Backend for AI Agent helping with UPSC/GATE/Current Affairs",
+    title="PeerPilates API",
+    description="Backend for PeerPilates - AI Agent helping with UPSC/GATE/Current Affairs",
     version="1.0.0"
 )
 
 # Add session middleware for OAuth state management
-app.add_middleware(SessionMiddleware, secret_key="your-secret-key-for-oauth-sessions-change-in-production")
+app.add_middleware(SessionMiddleware, secret_key=settings.SESSION_SECRET_KEY)
 
-# Allow frontend (e.g., Next.js) to access the API
+# Get frontend URL from environment or use defaults
+frontend_url = settings.FRONTEND_URL
+
+# Allow frontend to access the API
 origins = [
     "http://localhost:3000",  # Next.js default
     "http://localhost:5173",  # Vite default
     "http://localhost:5174",  # Vite alternative port
-    "http://localhost:5175",  # Vite alternative port (current)
+    "http://localhost:5175",  # Vite alternative port
     "http://127.0.0.1:5173",  # Vite alternative
     "http://127.0.0.1:5174",  # Vite alternative port
-    "http://127.0.0.1:5175",  # Vite alternative port (current)
+    "http://127.0.0.1:5175",  # Vite alternative port
+    frontend_url,  # Production frontend URL
 ]
+
+# Filter out empty strings and None values
+origins = [origin for origin in origins if origin]
 
 app.add_middleware(
     CORSMiddleware,

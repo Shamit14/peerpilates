@@ -1,6 +1,10 @@
-# AI Agent - Government Exam Preparation Platform
+# PeerPilates - Government Exam Preparation Platform
 
 A comprehensive AI-powered platform for Indian government competitive exam preparation, featuring intelligent chat assistance, file upload capabilities, and specialized knowledge for UPSC, GATE, SSC, Banking, and Railways exams.
+
+## 🌐 Live Demo
+- **Frontend**: [https://peerpilates-frontend.onrender.com](https://peerpilates-frontend.onrender.com)
+- **Backend API**: [https://peerpilates-api.onrender.com](https://peerpilates-api.onrender.com)
 
 ## 🚀 Features
 
@@ -173,6 +177,59 @@ Frontend will be available at `http://localhost:5173`
 2. Create a database
 3. Update `DATABASE_URL` in `.env`
 4. Tables will be created automatically on first run
+
+## 🚀 Deployment on Render
+
+### Automatic Deployment (Recommended)
+1. Fork this repository on GitHub
+2. Go to [Render Dashboard](https://dashboard.render.com)
+3. Click **New** → **Blueprint**
+4. Connect your GitHub repository
+5. Render will automatically read `render.yaml` and create all services
+
+### Manual Deployment
+
+#### 1. Create PostgreSQL Database
+1. Go to Render Dashboard → **New** → **PostgreSQL**
+2. Name: `peerpilates-db`
+3. Plan: Free
+4. Create database and copy the **Internal Database URL**
+
+#### 2. Deploy Backend (Web Service)
+1. **New** → **Web Service**
+2. Connect your repo
+3. Settings:
+   - Name: `peerpilates-api`
+   - Root Directory: (leave empty)
+   - Runtime: Python 3
+   - Build Command: `pip install -r requirements.txt`
+   - Start Command: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+4. Add Environment Variables:
+   - `DATABASE_URL`: Your PostgreSQL connection string (change `postgres://` to `postgresql+asyncpg://`)
+   - `GOOGLE_CLIENT_ID`: Your Google OAuth Client ID
+   - `GOOGLE_CLIENT_SECRET`: Your Google OAuth Client Secret
+   - `GEMINI_API_KEY`: Your Google Gemini API key
+   - `FRONTEND_URL`: `https://peerpilates-frontend.onrender.com`
+   - `BACKEND_URL`: `https://peerpilates-api.onrender.com`
+
+#### 3. Deploy Frontend (Static Site)
+1. **New** → **Static Site**
+2. Connect your repo
+3. Settings:
+   - Name: `peerpilates-frontend`
+   - Root Directory: `frontend`
+   - Build Command: `npm install && npm run build`
+   - Publish Directory: `dist`
+4. Add Environment Variables:
+   - `VITE_API_URL`: `https://peerpilates-api.onrender.com`
+5. Add Rewrite Rule:
+   - Source: `/*`
+   - Destination: `/index.html`
+   - Action: Rewrite
+
+#### 4. Update Google OAuth
+Add your Render backend URL to authorized redirect URIs in Google Cloud Console:
+- `https://peerpilates-api.onrender.com/api/auth/google/callback`
 
 ## 📚 API Documentation
 

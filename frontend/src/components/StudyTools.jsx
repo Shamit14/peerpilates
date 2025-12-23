@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useUser } from '../contexts/UserContext';
 import { parseMarkdown } from '../utils/markdownParser';
+import { api } from '../config/api';
 
 // Icons
 const CalendarIcon = () => (
@@ -158,7 +159,7 @@ function StudyTools({ onBack, selectedExam }) {
         const daysRemaining = timeData?.totalDays || 90;
         
         try {
-            const response = await fetch('http://localhost:8000/api/ai-agent/chat', {
+            const response = await fetch(api.chat, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

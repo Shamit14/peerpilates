@@ -69,7 +69,7 @@ async def google_callback(request: Request, db: AsyncSession = Depends(get_db)):
             if not allow_signup:
                 # User doesn't exist and signup not allowed - redirect with error
                 error_message = urllib.parse.quote(f"No account found for {user_info['email']}. Please create an account first or use Google Sign-In from the signup page.")
-                frontend_url = f"http://localhost:5173/auth-error?error={error_message}"
+                frontend_url = f"{settings.FRONTEND_URL}/auth-error?error={error_message}"
                 return RedirectResponse(url=frontend_url)
             
             is_new_user = True
@@ -99,13 +99,13 @@ async def google_callback(request: Request, db: AsyncSession = Depends(get_db)):
         user_json = urllib.parse.quote(json.dumps(user_data))
         
         # Redirect to frontend with user data
-        frontend_url = f"http://localhost:5173/auth-success?user={user_json}"
+        frontend_url = f"{settings.FRONTEND_URL}/auth-success?user={user_json}"
         return RedirectResponse(url=frontend_url)
 
     except Exception as e:
         # Redirect to frontend with error
         error_message = urllib.parse.quote(str(e))
-        frontend_url = f"http://localhost:5173/auth-error?error={error_message}"
+        frontend_url = f"{settings.FRONTEND_URL}/auth-error?error={error_message}"
         return RedirectResponse(url=frontend_url)
 
 @router.get("/google/status")

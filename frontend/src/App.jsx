@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { UserProvider, useUser } from './contexts/UserContext';
 import { ChatProvider, useChat } from './contexts/ChatContext';
 import { FileUploadProvider } from './contexts/FileUploadContext';
+import { api } from './config/api';
 import Auth from './components/Auth';
 import AuthSuccess from './components/AuthSuccess';
 import AuthError from './components/AuthError';
@@ -114,7 +115,7 @@ function AppContent() {
     try {
 
       // Call the backend API
-      const response = await fetch('http://localhost:8000/api/ai-agent/chat', {
+      const response = await fetch(api.chat, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
