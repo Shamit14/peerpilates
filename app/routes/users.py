@@ -77,6 +77,15 @@ async def signup(user_data: UserCreate, db: AsyncSession = Depends(get_db)):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Email already registered"
         )
+    except HTTPException:
+        raise
+    except Exception as e:
+        await db.rollback()
+        print(f"Signup error: {type(e).__name__}: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Signup failed: {str(e)}"
+        )
 
 @router.post("/login")
 async def login(user_data: UserLogin, db: AsyncSession = Depends(get_db)):
