@@ -63,16 +63,28 @@ app.include_router(files.router, prefix="/api", tags=["Files"])
 frontend_dist = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend", "dist")
 if os.path.exists(frontend_dist):
     # Serve static assets (JS, CSS, images)
-    app.mount("/assets", StaticFiles(directory=os.path.join(frontend_dist, "assets")), name="assets")
+    assets_dir = os.path.join(frontend_dist, "assets")
+    if os.path.exists(assets_dir):
+        app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
     
     # Serve index.html for all non-API routes (SPA routing)
+    @app.get("/")
+    async def serve_root():
+        index_path = os.path.join(frontend_dist, "index.html")
+        return FileResponse(index_path)
+    
     @app.get("/{full_path:path}")
     async def serve_spa(full_path: str):
-        # If path starts with api, let it 404 naturally
-        if full_path.startswith("api"):
-            return FileResponse(status_code=404)
-        # Serve index.html for all other routes
+        # Don't interfere with API routes
+        if full_path.startswith("api") or full_path.startswith("docs") or full_path.startswith("openapi"):
+            from fastapi.responses import JSONResponse
+            return JSONResponse({"detail": "Not Found"}, status_code=404)
+        
+        # Try to serve the exact file first (for favicon, etc.)
+        file_path = os.path.join(frontend_dist, full_path)
+        if os.path.exists(file_path) and os.path.isfile(file_path):
+            return FileResponse(file_path)
+        
+        # Otherwise serve index.html for SPA routing
         index_path = os.path.join(frontend_dist, "index.html")
-        if os.path.exists(index_path):
-            return FileResponse(index_path)
-        return FileResponse(status_code=404)
+        return FileResponse(index_path)
