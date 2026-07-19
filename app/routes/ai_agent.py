@@ -33,15 +33,19 @@ async def get_ai_agent_status():
         "supported_subjects": ["UPSC", "GATE", "SSC", "Banking", "Railways", "Current Affairs"]
     }
 
+# Models to try in order if quota is exceeded
+MODEL_FALLBACK_CHAIN = [
+    'gemini-flash-latest',
+    'gemini-flash-lite-latest',
+    'gemini-pro-latest',
+]
+
 async def get_gemini_response(message: str, subject: str, file_content: Optional[str] = None) -> str:
     """Get response from Gemini API for government exam preparation."""
     
     try:
         if not settings.GEMINI_API_KEY:
             raise Exception("Gemini API key not configured")
-        
-        # Create the model (using latest stable version)
-        model = genai.GenerativeModel('gemini-2.5-flash')
         
         # Prepare the enhanced prompt with formatting guidelines
         system_prompt = f"""You are an expert AI tutor specializing in Indian government competitive examinations. You have extensive knowledge about {subject} and other government exams like UPSC, GATE, SSC, Banking, Railways, etc.
@@ -88,14 +92,28 @@ Remember: Format your response exactly like the template above with proper headi
         if file_content:
             system_prompt += f"\n\nUser has uploaded content:\n{file_content[:2000]}...\n\nPlease analyze this content and relate it to their query about {subject}."
         
-        # Generate response
-        response = model.generate_content(system_prompt)
+        # Try each model in the fallback chain until one succeeds
+        last_error = None
+        for model_name in MODEL_FALLBACK_CHAIN:
+            try:
+                model = genai.GenerativeModel(model_name)
+                response = model.generate_content(system_prompt)
+                if response.text:
+                    print(f"Gemini response using model: {model_name}")
+                    return response.text
+            except Exception as model_err:
+                err_str = str(model_err)
+                if '429' in err_str or 'quota' in err_str.lower() or 'rate' in err_str.lower():
+                    print(f"Model {model_name} quota exceeded, trying next model...")
+                    last_error = model_err
+                    continue
+                else:
+                    raise model_err
         
-        if response.text:
-            return response.text
-        else:
-            return get_enhanced_response(message, subject)
-            
+        # All models exhausted
+        print(f"All models quota exceeded: {last_error}")
+        return get_enhanced_response(message, subject)
+
     except Exception as e:
         print(f"Gemini API error: {str(e)}")
         # Fallback to enhanced response
@@ -177,7 +195,7 @@ async def test_gemini_api():
         if not settings.GEMINI_API_KEY:
             return {"status": "error", "message": "Gemini API key not configured"}
         
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        model = genai.GenerativeModel('gemini-flash-latest')
         response = model.generate_content("Hello! Can you help with UPSC preparation?")
         
         if response.text:

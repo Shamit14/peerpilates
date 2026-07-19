@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from starlette.middleware.sessions import SessionMiddleware
-from app.routes import users, ai_agent, protected, files
+from app.routes import users, ai_agent, protected, files, mock_test
 from app.auth import routes as auth_routes
 from app.models.user import Base
 from app.database import engine
@@ -58,6 +58,7 @@ app.include_router(users.router, prefix="/api", tags=["Users"])
 app.include_router(ai_agent.router, prefix="/api", tags=["AI Agent"])
 app.include_router(protected.router, prefix="/api", tags=["Protected"])
 app.include_router(files.router, prefix="/api", tags=["Files"])
+app.include_router(mock_test.router, prefix="/api", tags=["Mock Test"])
 
 # Serve frontend static files (for production)
 frontend_dist = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend", "dist")

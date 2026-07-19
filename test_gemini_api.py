@@ -23,7 +23,7 @@ def test_gemini_api():
         
         # Test a simple generation
         # Test with a simple question
-        model = genai.GenerativeModel('gemini-2.5-flash')
+        model = genai.GenerativeModel('gemini-flash-latest')
         response = model.generate_content("Say hello in one sentence.")
         
         print(f"✅ API Test Successful!")

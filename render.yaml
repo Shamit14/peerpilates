@@ -1,14 +1,14 @@
 databases:
-  - name: peerpilates-db
-    databaseName: peerpilates
-    user: peerpilates
+  - name: eprep-ai-db
+    databaseName: eprep_ai
+    user: eprep_ai
     plan: free
     region: oregon
 
 services:
   # Backend API Service
   - type: web
-    name: peerpilates-api
+    name: eprep-ai-backend
     runtime: python
     region: oregon
     plan: free
@@ -17,7 +17,7 @@ services:
     envVars:
       - key: DATABASE_URL
         fromDatabase:
-          name: peerpilates-db
+          name: eprep-ai-db
           property: connectionString
       - key: GOOGLE_CLIENT_ID
         sync: false
@@ -32,11 +32,11 @@ services:
       - key: SESSION_SECRET_KEY
         generateValue: true
       - key: PYTHON_VERSION
-        value: 3.11.4
+        value: "3.11.4"
 
   # Frontend Static Site
   - type: web
-    name: peerpilates-frontend
+    name: eprep-ai-frontend
     runtime: static
     region: oregon
     plan: free

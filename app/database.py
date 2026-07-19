@@ -12,7 +12,15 @@ if not DATABASE_URL:
 if DATABASE_URL.startswith("postgresql://"):
     DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
 
-engine = create_async_engine(DATABASE_URL, echo=False)
+engine = create_async_engine(
+    DATABASE_URL,
+    echo=False,
+    pool_size=5,          # Keep 5 connections ready
+    max_overflow=10,      # Allow up to 10 extra connections under load
+    pool_recycle=300,     # Recycle connections every 5 min (Render can drop idle ones)
+    pool_pre_ping=True,   # Test connections before using them (avoids stale connection errors)
+    pool_timeout=30,      # Wait up to 30s for a connection from the pool
+)
 
 async_session = sessionmaker(
     bind=engine,

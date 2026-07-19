@@ -12,6 +12,7 @@ import Sidebar from './components/SideBar';
 import ChatWindow from './components/chatWindow';
 import InputBar from './components/InputBar';
 import StudyTools from './components/StudyTools';
+import MockTest from './components/MockTest';
 
 /**
  * Simple router component to handle different paths
@@ -29,6 +30,10 @@ function SimpleRouter() {
   
   if (path === '/study-tools') {
     return <StudyToolsPage />;
+  }
+  
+  if (path === '/mock-test') {
+    return <MockTestPage />;
   }
   
   return <AppContent />;
@@ -70,6 +75,44 @@ function StudyToolsPage() {
   };
 
   return <StudyTools onBack={handleBack} selectedExam={selectedExam} />;
+}
+
+/**
+ * Mock Test Page Component
+ */
+function MockTestPage() {
+  const { user, isLoading } = useUser();
+  const [selectedExam, setSelectedExam] = useState(() => {
+    const savedExam = localStorage.getItem('selectedExam');
+    return savedExam ? JSON.parse(savedExam) : null;
+  });
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-black">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    window.location.href = '/';
+    return null;
+  }
+
+  if (!selectedExam) {
+    window.location.href = '/';
+    return null;
+  }
+
+  const handleBack = () => {
+    window.location.href = '/';
+  };
+
+  return <MockTest onBack={handleBack} selectedExam={selectedExam} />;
 }
 
 /**
@@ -387,6 +430,18 @@ Make it personalized for ${daysRemaining > 0 ? daysRemaining + ' days' : 'next e
               </button>
               <p className="text-xs text-gray-500 text-center mt-2">Study Plan & Time Tracker</p>
             </div>
+
+            {/* Mock Test Button */}
+            <div className="mt-3">
+              <button
+                onClick={() => window.location.href = '/mock-test'}
+                className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition-all shadow-md flex items-center justify-center gap-2"
+              >
+                <span>📝</span>
+                <span>Generate Mock Test</span>
+              </button>
+              <p className="text-xs text-gray-500 text-center mt-2">Download Practice Papers</p>
+            </div>
           </div>
         </div>
         <div className="flex flex-col flex-1 h-full bg-white">
@@ -410,6 +465,18 @@ Make it personalized for ${daysRemaining > 0 ? daysRemaining + ' days' : 'next e
                   className="w-full bg-black text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-gray-800 transition-colors"
                 >
                   Open Study Tools →
+                </button>
+              </div>
+
+              {/* Link to Mock Test Page */}
+              <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                <h4 className="font-medium text-blue-900 mb-2">📝 Mock Test Generator</h4>
+                <p className="text-sm text-blue-700 mb-3">Generate and download practice test papers for your exam.</p>
+                <button 
+                  onClick={() => window.location.href = '/mock-test'}
+                  className="w-full bg-blue-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors"
+                >
+                  Generate Mock Test →
                 </button>
               </div>
               

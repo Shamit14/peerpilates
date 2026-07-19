@@ -18,4 +18,8 @@ export const api = {
   files: {
     upload: `${API_URL}/api/files/upload`,
   },
+  mockTest: {
+    generate: `${API_URL}/api/mock-test/generate`,
+    subjects: (exam) => `${API_URL}/api/mock-test/subjects/${exam}`,
+  },
 };
