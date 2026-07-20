@@ -7,7 +7,7 @@ import Auth from './components/Auth';
 import AuthSuccess from './components/AuthSuccess';
 import AuthError from './components/AuthError';
 import ExamSelection from './components/ExamSelection';
-import Header from './components/header';
+import Header from './components/Header';
 import Sidebar from './components/SideBar';
 import ChatWindow from './components/chatWindow';
 import InputBar from './components/InputBar';
